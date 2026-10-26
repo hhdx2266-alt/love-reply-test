@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no" />
+<title>对象一小时没回消息，你会？</title>
+<style>
+  :root{
+    --pink:#f6c6d6;
+    --pink-deep:#e98aac;
+    --pink-soft:#fdeef3;
+    --purple:#cdb4e8;
+    --purple-soft:#efe7fb;
+    --cream:#fff7f1;
+    --ink:#4a3742;
+    --ink-soft:#7a6571;
+    --line:#f0d4e0;
+    --shadow:0 10px 30px rgba(201,120,150,.18);
+    --radius:20px;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    color:var(--ink);
+    background:
+      radial-gradient(120% 80% at 10% 0%, var(--purple-soft) 0%, transparent 55%),
+      radial-gradient(120% 80% at 100% 10%, var(--pink-soft) 0%, transparent 55%),
+      #fff;
+    min-height:100vh;
+  }
+  .app{
+    max-width:480px;
+    margin:0 auto;
+    padding:18px 16px calc(28px + env(safe-area-inset-bottom));
+    position:relative;
+    min-height:100vh;
+  }
+  .floaty{position:fixed;pointer-events:none;opacity:.5;z-index:0;font-size:20px;animation:floaty 6s ease-in-out infinite;}
+  @keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+  .page{position:relative;z-index:1;animation:fade .45s ease both;}
+  @keyframes fade{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+
+  /* ---------- Home ---------- */
+  .home{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:calc(100vh - 60px);text-align:center;}
+  .bubble{
+    position:relative;background:#fff;border:2px solid var(--line);border-radius:22px;
+    padding:22px 20px 24px;box-shadow:var(--shadow);max-width:360px;
+  }
+  .bubble::after{content:"";position:absolute;left:38px;bottom:-14px;width:24px;height:24px;
+    background:#fff;border-right:2px solid var(--line);border-bottom:2px solid var(--line);
+    transform:rotate(45deg);border-radius:0 0 6px 0;}
+  .tag{display:inline-block;font-size:12px;letter-spacing:2px;color:var(--pink-deep);
+    background:var(--pink-soft);border:1px solid var(--line);padding:4px 12px;border-radius:999px;margin-bottom:14px;}
+  .home h1{font-size:25px;line-height:1.4;margin:4px 0 10px;color:var(--ink);letter-spacing:.5px;}
+  .home .sub{font-size:14.5px;color:var(--ink-soft);line-height:1.7;margin:0 4px 14px;}
+  .home .meta{font-size:12.5px;color:var(--ink-soft);margin-bottom:20px;letter-spacing:1px;}
+
+  /* ---------- Buttons ---------- */
+  button{font-family:inherit;cursor:pointer;border:none;}
+  .btn{
+    width:100%;padding:15px 18px;border-radius:999px;font-size:17px;font-weight:700;letter-spacing:2px;
+    transition:transform .12s ease,filter .2s ease;
+  }
+  .btn-primary{background:linear-gradient(135deg,var(--pink-deep),var(--purple));color:#fff;box-shadow:var(--shadow);}
+  .btn-primary:active{transform:scale(.98);}
+  .btn-ghost{background:#fff;color:var(--pink-deep);border:1.5px solid var(--pink-deep);}
+  .btn-ghost:active{transform:scale(.98);}
+  .btn:disabled{opacity:.45;filter:grayscale(.3);box-shadow:none;}
+
+  /* ---------- Quiz ---------- */
+  .quiz-top{display:flex;align-items:center;gap:12px;margin-bottom:14px;}
+  .quiz-count{font-size:13.5px;font-weight:700;color:var(--pink-deep);white-space:nowrap;letter-spacing:1px;}
+  .bar{flex:1;height:9px;background:#f3e0ea;border-radius:999px;overflow:hidden;border:1px solid var(--line);}
+  .bar-fill{height:100%;background:linear-gradient(90deg,var(--pink-deep),var(--purple));border-radius:999px;transition:width .4s cubic-bezier(.22,1,.36,1);}
+  .card{background:#fff;border:2px solid var(--line);border-radius:var(--radius);padding:22px 18px;box-shadow:var(--shadow);}
+  .scene{text-align:center;font-size:12px;letter-spacing:3px;color:var(--purple);margin-bottom:8px;}
+  .q{font-size:18.5px;line-height:1.65;font-weight:700;margin:0 0 18px;text-align:center;letter-spacing:.3px;}
+  .opts{display:flex;flex-direction:column;gap:12px;}
+  .opt{
+    display:flex;align-items:flex-start;gap:12px;width:100%;text-align:left;background:var(--cream);
+    border:1.5px solid var(--line);border-radius:14px;padding:14px;font-size:15.5px;line-height:1.6;color:var(--ink);
+    transition:transform .12s ease,border-color .2s,background .2s,box-shadow .2s;position:relative;
+  }
+  .opt:active{transform:scale(.99);}
+  .opt .k{flex:0 0 auto;width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--pink-deep),var(--purple));
+    color:#fff;font-weight:700;font-size:14px;display:flex;align-items:center;justify-content:center;margin-top:1px;}
+  .opt .t{flex:1;}
+  .opt.selected{border-color:var(--pink-deep);background:var(--pink-soft);box-shadow:0 0 0 2px rgba(233,138,172,.18);}
+  .opt .check{position:absolute;right:12px;top:12px;color:var(--pink-deep);font-weight:800;}
+  .nav{display:flex;gap:12px;margin-top:18px;}
+  .nav .btn{flex:1;}
+
+  /* ---------- Result ---------- */
+  .res{text-align:center;}
+  .res-head{background:linear-gradient(135deg,var(--pink-soft),var(--purple-soft));border:2px solid var(--line);
+    border-radius:var(--radius);padding:22px 18px 24px;box-shadow:var(--shadow);margin-bottom:14px;}
+  .congrats{font-size:13px;letter-spacing:2px;color:var(--pink-deep);margin-bottom:8px;}
+  .res-name{font-size:27px;font-weight:800;letter-spacing:1px;margin:2px 0 6px;}
+  .res-tagline{font-size:15px;font-weight:700;line-height:1.6;color:var(--ink);margin:6px 8px 12px;}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;}
+  .chip{font-size:12.5px;font-weight:700;padding:6px 12px;border-radius:999px;background:#fff;border:1px solid var(--line);color:var(--pink-deep);}
+  .block{background:#fff;border:2px solid var(--line);border-radius:var(--radius);padding:18px;margin-bottom:14px;box-shadow:var(--shadow);}
+  .block h3{margin:0 0 10px;font-size:15.5px;color:var(--pink-deep);border-left:4px solid var(--purple);padding-left:10px;letter-spacing:1px;}
+  .block p{margin:0;font-size:14.5px;line-height:1.9;color:var(--ink);}
+  .disclaimer{font-size:11px;color:#a8929c;margin-top:10px;}
+  .card-preview{display:flex;justify-content:center;margin-top:6px;}
+  .card-preview canvas{max-width:100%;height:auto;border-radius:14px;box-shadow:var(--shadow);border:2px solid var(--line);}
+  .actions{display:flex;flex-direction:column;gap:12px;margin-top:4px;}
+  .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:rgba(74,55,66,.94);color:#fff;
+    font-size:14px;padding:11px 20px;border-radius:999px;box-shadow:var(--shadow);z-index:50;animation:fade .25s ease both;max-width:86%;text-align:center;}
+
+  @media (min-width:560px){.home{min-height:calc(100vh - 60px);}.home h1{font-size:28px;}}
+</style>
+</head>
+<body>
+<div class="app" id="app"></div>
+
+<script>
+/* ===================== 数据：10 题 + 维度映射 ===================== */
+/* 维度：A 理智派 / B 安全感 / C 连续剧 / D 嘴硬 / E 直球 / F 清醒边界 */
+const QUESTIONS = [
+  { id:1, scene:"第 1 幕 · 消失的一小时", q:"对象已经一小时没有回复你，你第一反应是？",
+    options:[
+      {t:"可能在忙吧，先做自己的事情。", d:"A"},
+      {t:"他怎么还不回？是不是哪里不对劲？", d:"B"},
+      {t:"打开聊天框看几次，忍住不再发消息。", d:"C"},
+      {t:"既然他不回，那我也先不理他。", d:"D"},
+    ]},
+  { id:2, scene:"第 2 幕 · 看到对方在线", q:"你发现对象刚刚在线，却没有回复你的消息。",
+    options:[
+      {t:"可能只是顺手打开手机，不一定有空聊天。", d:"A"},
+      {t:"心里有点酸，开始想自己是不是不重要。", d:"B"},
+      {t:"表面没事，实际上已经反复点进聊天框。", d:"C"},
+      {t:"直接发句“在忙吗？”问清楚。", d:"E"},
+    ]},
+  { id:3, scene:"第 3 幕 · 终于收到回复", q:"等了很久，对象终于发来一句“刚刚在忙”。",
+    options:[
+      {t:"忙完就好，继续正常聊天。", d:"A"},
+      {t:"忍不住问一句：忙什么忙了这么久？", d:"B"},
+      {t:"先看看他说什么，心里的小剧场还没结束。", d:"C"},
+      {t:"回一句“哦”，让他也体验等待的感觉。", d:"D"},
+    ]},
+  { id:4, scene:"第 4 幕 · 你会主动追问吗", q:"一小时过去了，对象仍然没有回复，你会？",
+    options:[
+      {t:"不会，没必要一直盯着手机。", d:"A"},
+      {t:"会想发消息确认一下，但又怕显得自己太在意。", d:"B"},
+      {t:"直接问一句“还在线吗”，把话说开。", d:"E"},
+      {t:"先忙自己的，该联系时自然会联系。", d:"F"},
+    ]},
+  { id:5, scene:"第 5 幕 · 反常的沉默", q:"如果对象平时回复很快，今天突然很久没回，你会？",
+    options:[
+      {t:"先考虑现实原因，不会马上下结论。", d:"A"},
+      {t:"理智告诉自己没事，情绪却一直被影响。", d:"C"},
+      {t:"直接说“你今天回得有点慢，是忙吗”。", d:"E"},
+      {t:"会有点生气，觉得对方至少应该提前说一声。", d:"F"},
+    ]},
+  { id:6, scene:"第 6 幕 · 朋友的劝慰", q:"朋友说：“才一小时而已，有什么好在意的？”",
+    options:[
+      {t:"我也知道，但在乎一个人就是会忍不住。", d:"B"},
+      {t:"我不想解释，反正只有自己知道有多纠结。", d:"C"},
+      {t:"我在意的不是一小时，是他为什么不主动交代。", d:"D"},
+      {t:"我在意的是彼此有没有基本的回应。", d:"F"},
+    ]},
+  { id:7, scene:"第 7 幕 · 他发了朋友圈", q:"对象没有回复你，却发了一条朋友圈。",
+    options:[
+      {t:"先不急着判断，也许发朋友圈不需要花太多时间。", d:"A"},
+      {t:"瞬间有点委屈，原来他有时间玩手机。", d:"B"},
+      {t:"默默看完动态，再回聊天框确认有没有新消息。", d:"C"},
+      {t:"好啊，那我也发一条，让他看看我也很忙。", d:"D"},
+    ]},
+  { id:8, scene:"第 8 幕 · 解释之后", q:"对象解释说：“刚刚开会，没看手机。”",
+    options:[
+      {t:"了解了，之后有空再聊就好。", d:"A"},
+      {t:"会接受解释，但还是希望他以后能提前说一声。", d:"B"},
+      {t:"我会直接说清楚，哪些情况会让我不舒服。", d:"E"},
+      {t:"接受，但记下了以后要互相报备。", d:"F"},
+    ]},
+  { id:9, scene:"第 9 幕 · 最难受的事", q:"恋爱中最让你难受的是什么？",
+    options:[
+      {t:"自己很在乎，对方却不够在乎。", d:"B"},
+      {t:"明明想轻松恋爱，却总被情绪牵着走。", d:"C"},
+      {t:"自己总是主动沟通，对方却不愿意回应问题。", d:"E"},
+      {t:"彼此没有信任，总是在互相猜。", d:"F"},
+    ]},
+  { id:10, scene:"第 10 幕 · 如果经常发生", q:"如果对象总是很久不回复，也很少主动联系你，你会？",
+    options:[
+      {t:"先沟通彼此的生活节奏，再看是否合适。", d:"A"},
+      {t:"认真谈一次，把你的需求说清楚。", d:"E"},
+      {t:"谈一次边界和需求，长期没改变就重新考虑。", d:"F"},
+      {t:"既然他这样，那我也冷着他。", d:"D"},
+    ]},
+];
+
+const DIM_ORDER = ["A","B","C","D","E","F"];
+
+const RESULTS = {
+  A:{ name:"情绪稳定的理智派", color:"#e98aac",
+      keywords:["独立","信任感强","情绪稳定"],
+      tagline:"一小时没回？你可能连手机都没看几次。",
+      share:"#情绪稳定的理智派",
+      text:"对象一小时没回消息？你可能连手机都没看几次。你知道恋爱很重要，但生活也不能暂停。你不会因为一次延迟回复就否定感情，更愿意相信对方，也相信自己。\n你的隐藏优势：能给彼此空间，不会把所有情绪都交给消息提示音。\n温馨提醒：独立不代表什么都不需要。如果你也希望对方多关心你，可以直接说出来。" },
+  B:{ name:"需要回应的安全感选手", color:"#d98ab0",
+      keywords:["重视陪伴","在乎回应","需要确定感"],
+      tagline:"你不是要秒回，只是想被认真对待。",
+      share:"#需要回应的安全感选手",
+      text:"你不是非要对象秒回，只是希望自己发出的消息能被认真对待。对你来说，回复不只是回复，也是一种“我有把你放在心上”的感觉。\n你的隐藏优势：重视关系，愿意投入感情。\n温馨提醒：试着把“你为什么不回我”换成“你忙的时候告诉我一声，我会更安心”。清楚表达需求，比独自猜测更有效。" },
+  C:{ name:"表面淡定的内心连续剧派", color:"#b58ad9",
+      keywords:["嘴上没事","内心丰富","容易反复琢磨"],
+      tagline:"你嘴上说没事，心里已经演完一整部剧。",
+      share:"#内心连续剧派",
+      text:"你看起来很淡定，甚至还能回复一句“没事，你忙”，但你的内心可能已经完成了从理解、怀疑到自我安慰的全过程。\n你的隐藏优势：敏感细腻，很会察觉关系中的变化。\n温馨提醒：一次没回复不等于不爱你。先放下手机做点自己的事，别让还没有答案的猜测消耗自己。" },
+  D:{ name:"傲娇反击的嘴硬派", color:"#cf8ab0",
+      keywords:["不想示弱","讲究平衡","嘴硬心软"],
+      tagline:"他不回？那你也别回，谁先沉不住气谁输。",
+      share:"#嘴硬心软的傲娇派",
+      text:"他不回？那你也不回。不是你不在意，而是你不想让自己看起来太在意。你希望被重视，但又不愿意总是先低头。\n你的隐藏优势：有自己的原则，不喜欢单方面付出。\n温馨提醒：感情不是谁先回复谁就输了。与其互相冷处理，不如直接说出你介意的地方。" },
+  E:{ name:"直球沟通的行动派", color:"#9a8ad9",
+      keywords:["不爱猜测","表达直接","重视解决问题"],
+      tagline:"谈恋爱不靠猜，不舒服就说清楚。",
+      share:"#直球沟通行动派",
+      text:"你不喜欢靠猜来谈恋爱。对方忙，你可以理解；但如果某种相处方式让你不舒服，你更愿意找个时间把话说清楚。\n你的隐藏优势：重视沟通，不容易陷入无休止的冷战。\n温馨提醒：表达需求时，也给对方解释和回应的空间。沟通不是为了争输赢，而是为了找到双方都舒服的方式。" },
+  F:{ name:"边界清晰的清醒派", color:"#d9a98a",
+      keywords:["重视双向付出","尊重彼此","看重长期相处"],
+      tagline:"不纠结一小时，但长期忽视你也不会委屈自己。",
+      share:"#清醒恋爱边界派",
+      text:"你不会因为一小时没回复就立刻下结论，但如果长期忽视、反复失约、沟通无效，你也不会无限委屈自己。你看重的不是秒回，而是关系里有没有基本的尊重和回应。\n你的隐藏优势：知道自己想要什么，也愿意观察一段关系是否适合自己。\n温馨提醒：每个人的回复习惯不同。先分清偶尔忙碌和长期忽视，再决定如何面对这段关系。" },
+};
+
+/* ===================== 计分逻辑（确定性） ===================== */
+function computeScores(answers){
+  const s={A:0,B:0,C:0,D:0,E:0,F:0};
+  for(const q of QUESTIONS){
+    const ans=answers[q.id];
+    if(!ans) continue;
+    const opt=q.options.find(o=>o.t===ans);
+    if(opt) s[opt.d]+=1;
+  }
+  return s;
+}
+/* 平局：先看最后三题（Q8/Q9/Q10）得分；仍并列则按固定顺序 A>B>C>D>E>F */
+function decide(scores){
+  let best=DIM_ORDER[0], bestVal=-1;
+  for(const k of DIM_ORDER){ if(scores[k]>bestVal){bestVal=scores[k];best=k;} }
+  const tied=DIM_ORDER.filter(k=>scores[k]===bestVal);
+  if(tied.length===1) return best;
+  const last3=[QUESTIONS[7],QUESTIONS[8],QUESTIONS[9]];
+  let win=tied[0], winSub=-1;
+  for(const k of tied){
+    let sub=0;
+    for(const q of last3){ const opt=q.options.find(o=>o.t===answers[q.id]); if(opt&&opt.d===k) sub+=1; }
+    if(sub>winSub){winSub=sub;win=k;}
+  }
+  if(tied.every(k=>winSub===0)) return DIM_ORDER.find(k=>tied.includes(k));
+  return win;
+}
+
+/* ===================== 状态 & 渲染 ===================== */
+const TOTAL=QUESTIONS.length;
+const state={ view:"home", step:0, answers:{}, };
+const app=document.getElementById("app");
+let toastTimer=null;
+
+function toast(msg){
+  let el=document.querySelector(".toast");
+  if(!el){ el=document.createElement("div"); el.className="toast"; document.body.appendChild(el); }
+  el.textContent=msg;
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>{ if(el&&el.parentNode) el.parentNode.removeChild(el); },2600);
+}
+
+function render(){
+  if(state.view==="home") return renderHome();
+  if(state.view==="quiz") return renderQuiz();
+  return renderResult();
+}
+
+function renderHome(){
+  app.innerHTML=`
+    <div class="page home">
+      <div class="bubble">
+        <span class="tag">恋爱反应测试</span>
+        <h1>对象一小时没回消息，你会？</h1>
+        <p class="sub">嘴上说着没事，心里已经演完一整部剧了吗？</p>
+        <p class="meta">10 道情境题 · 测出你的恋爱反应模式</p>
+        <button class="btn btn-primary" id="start">开始测试</button>
+      </div>
+    </div>`;
+  document.getElementById("start").addEventListener("click",()=>{
+    state.view="quiz"; state.step=0; state.answers={}; render();
+  });
+}
+
+function renderQuiz(){
+  const q=QUESTIONS[state.step];
+  const progress=((state.step+1)/TOTAL)*100;
+  const current=state.answers[q.id];
+  const isLast=state.step===TOTAL-1;
+  const optsHtml=q.options.map((o,i)=>{
+    const sel=current===o.t?" selected":"";
+    const key="ABCD"[i];
+    return `<button class="opt${sel}" data-t="${encodeURIComponent(o.t)}">
+      <span class="k">${key}</span><span class="t">${o.t}</span>${sel?'<span class="check">✓</span>':''}
+    </button>`;
+  }).join("");
+  app.innerHTML=`
+    <div class="page quiz">
+      <div class="quiz-top">
+        <div class="quiz-count">第 ${state.step+1} / ${TOTAL} 题</div>
+        <div class="bar"><div class="bar-fill" style="width:${progress}%"></div></div>
+      </div>
+      <div class="card">
+        <div class="scene">${q.scene}</div>
+        <h2 class="q">${q.q}</h2>
+        <div class="opts">${optsHtml}</div>
+      </div>
+      <div class="nav">
+        <button class="btn btn-ghost" id="prev" ${state.step===0?'disabled':''}>上一题</button>
+        <button class="btn btn-primary" id="next" ${current?'':'disabled'}>${isLast?'查看结果':'下一题'}</button>
+      </div>
+    </div>`;
+  app.querySelectorAll(".opt").forEach(btn=>{
+    btn.addEventListener("click",()=>{
+      const t=decodeURIComponent(btn.getAttribute("data-t"));
+      state.answers[q.id]=t;
+      // 视觉反馈 + 自动跳到下一题
+      app.querySelectorAll(".opt").forEach(b=>b.classList.remove("selected"));
+      btn.classList.add("selected");
+      const nextBtn=document.getElementById("next"); if(nextBtn) nextBtn.disabled=false;
+      if(!isLast){
+        setTimeout(()=>{ state.step=Math.min(TOTAL-1,state.step+1); render(); },340);
+      }else{
+        setTimeout(()=>{ state.view="result"; render(); },340);
+      }
+    });
+  });
+  const prev=document.getElementById("prev");
+  if(prev) prev.addEventListener("click",()=>{ if(state.step>0){state.step--;render();} });
+  const next=document.getElementById("next");
+  if(next) next.addEventListener("click",()=>{
+    if(!state.answers[q.id]) return;
+    if(!isLast){ state.step=Math.min(TOTAL-1,state.step+1); render(); }
+    else { state.view="result"; render(); }
+  });
+}
+
+function renderResult(){
+  const scores=computeScores(state.answers);
+  const key=decide(scores);
+  const r=RESULTS[key];
+  const textHtml=r.text.split("\n").map(p=>`<p style="margin:0 0 10px">${p}</p>`).join("");
+  app.innerHTML=`
+    <div class="page res">
+      <div class="res-head">
+        <div class="congrats">测试完成 · 你的恋爱反应模式是</div>
+        <div class="res-name" style="color:${r.color}">${r.name}</div>
+        <div class="res-tagline">“${r.tagline}”</div>
+        <div class="chips">${r.keywords.map(k=>`<span class="chip">${k}</span>`).join("")}</div>
+      </div>
+      <div class="block">
+        <h3>你的结果解析</h3>
+        ${textHtml}
+        <p class="disclaimer">* 本测试为娱乐与自我观察，非心理诊断。</p>
+      </div>
+      <div class="block">
+        <h3>我的结果卡</h3>
+        <div class="card-preview"><canvas id="rc" width="300" height="400"></canvas></div>
+      </div>
+      <div class="actions">
+        <button class="btn btn-primary" id="save">保存结果卡</button>
+        <button class="btn btn-ghost" id="copy">复制结果文案</button>
+        <button class="btn btn-ghost" id="retest">重新测试</button>
+      </div>
+    </div>`;
+  drawCard(document.getElementById("rc"), r);
+  document.getElementById("save").addEventListener("click",()=>saveCard(r));
+  document.getElementById("copy").addEventListener("click",()=>copyResult(r));
+  document.getElementById("retest").addEventListener("click",()=>{
+    state.view="home"; state.step=0; state.answers={}; render();
+  });
+}
+
+/* ===================== 结果卡（Canvas 绘制，无外部依赖） ===================== */
+function drawCard(cv,r){
+  const ctx=cv.getContext("2d");
+  const W=cv.width,H=cv.height;
+  const g=ctx.createLinearGradient(0,0,W,H);
+  g.addColorStop(0,"#fdeef3"); g.addColorStop(.5,"#f6e7fb"); g.addColorStop(1,"#fff7f1");
+  ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+  // 装饰爱心
+  ctx.globalAlpha=.25; ctx.fillStyle=r.color;
+  heart(ctx,40,60,16); heart(ctx,W-46,90,12); heart(ctx,70,H-70,10); heart(ctx,W-60,H-50,14);
+  ctx.globalAlpha=1;
+  // 顶部标题
+  ctx.fillStyle="#7a6571"; ctx.font="600 15px -apple-system,'PingFang SC','Microsoft YaHei',sans-serif";
+  ctx.textAlign="center"; ctx.fillText("对象一小时没回消息，你会？",W/2,46);
+  ctx.fillStyle=r.color; ctx.font="700 13px -apple-system,'PingFang SC',sans-serif";
+  ctx.fillText("— 恋爱反应模式 —",W/2,66);
+  // 结果名称
+  ctx.fillStyle=r.color; ctx.font="800 26px -apple-system,'PingFang SC',sans-serif";
+  ctx.fillText(r.name,W/2,120);
+  // 关键词
+  ctx.font="600 13px -apple-system,'PingFang SC',sans-serif"; ctx.fillStyle="#7a6571";
+  ctx.fillText(r.keywords.join("  ·  "),W/2,150);
+  // 分隔线
+  ctx.strokeStyle="#f0d4e0"; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(40,170); ctx.lineTo(W-40,170); ctx.stroke();
+  // 短句
+  ctx.fillStyle=r.color; ctx.font="700 15px -apple-system,'PingFang SC',sans-serif";
+  wrapText(ctx,"“"+r.tagline+"”",W/2,200,W-60,22);
+  // 正文
+  ctx.fillStyle="#4a3742"; ctx.font="400 13px -apple-system,'PingFang SC',sans-serif";
+  const body=r.text.split("\n").join(" ");
+  wrapText(ctx,body,W/2,250,W-56,20,true);
+  // 底部
+  ctx.fillStyle=r.color; ctx.font="700 13px -apple-system,'PingFang SC',sans-serif";
+  ctx.fillText(r.share,W/2,H-30);
+}
+function heart(ctx,x,y,s){
+  ctx.beginPath();
+  ctx.moveTo(x,y+s*0.3);
+  ctx.bezierCurveTo(x,y,x-s,y-s*0.1,x-s,y+s*0.35);
+  ctx.bezierCurveTo(x-s,y+s*0.7,x,y+s*0.95,x,y+s*1.1);
+  ctx.bezierCurveTo(x,y+s*0.95,x+s,y+s*0.7,x+s,y+s*0.35);
+  ctx.bezierCurveTo(x+s,y-s*0.1,x,y,x,y+s*0.3);
+  ctx.fill();
+}
+function wrapText(ctx,text,cx,y,maxW,lh,center){
+  const chars=[...text]; let line=""; let yy=y;
+  for(const ch of chars){
+    const test=line+ch;
+    if(ctx.measureText(test).width>maxW && line){ ctx.fillText(line,center?cx:cx, yy); line=ch; yy+=lh; }
+    else line=test;
+  }
+  if(line) ctx.fillText(line,center?cx:cx,yy);
+}
+
+/* ===================== 保存 / 复制 ===================== */
+function saveCard(r){
+  try{
+    const src=document.getElementById("rc");
+    const big=document.createElement("canvas"); big.width=600; big.height=800;
+    const bctx=big.getContext("2d");
+    // 重绘高清版
+    const tmp=src; src.width=300; // keep
+    drawCard(big,r);
+    const url=big.toDataURL("image/png");
+    const a=document.createElement("a"); a.href=url; a.download="恋爱反应测试-"+r.name+".png"; a.click();
+    toast("结果卡已保存为 PNG ✓");
+  }catch(e){ toast("保存失败，请使用“复制结果文案”"); }
+}
+function copyResult(r){
+  const text=`【对象一小时没回消息，你会？】\n我的结果：${r.name}\n“${r.tagline}”\n${r.text}\n${r.share}`;
+  const done=()=>toast("结果文案已复制 ✓");
+  const fail=()=>toast("复制失败，请长按文字手动复制");
+  try{
+    if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(text).then(done).catch(fail); return; }
+  }catch(e){}
+  try{
+    const ta=document.createElement("textarea"); ta.value=text; ta.style.position="fixed"; ta.style.opacity="0";
+    document.body.appendChild(ta); ta.select();
+    const ok=document.execCommand("copy"); document.body.removeChild(ta);
+    ok?done():fail();
+  }catch(e){ fail(); }
+}
+
+/* ===================== 启动 ===================== */
+// 漂浮装饰
+["💗","💬","🌙","⭐","💗","💬"].forEach((e,i)=>{
+  const s=document.createElement("div"); s.className="floaty"; s.textContent=e;
+  s.style.left=(8+ (i*15)%80)+"%"; s.style.top=(10+(i*23)%75)+"%";
+  s.style.animationDelay=(i*0.7)+"s"; document.body.appendChild(s);
+});
+render();
+</script>
+</body>
+</html>
